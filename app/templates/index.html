@@ -2,50 +2,349 @@
 <html>
 <head>
     <title>Delivery Time Predictor</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #0d0d0f;
+            --surface: #16161a;
+            --surface2: #1e1e24;
+            --border: rgba(255,255,255,0.07);
+            --border-hover: rgba(255,255,255,0.15);
+            --accent: #00e5a0;
+            --accent-dim: rgba(0, 229, 160, 0.12);
+            --accent-glow: rgba(0, 229, 160, 0.25);
+            --text-primary: #f0f0f3;
+            --text-secondary: #7a7a8c;
+            --text-muted: #3f3f52;
+            --danger: #ff5c5c;
+            --font: 'DM Sans', sans-serif;
+            --mono: 'DM Mono', monospace;
+            --radius: 16px;
+            --radius-sm: 10px;
+        }
+
         body {
-            font-family: Arial;
-            background: #f4f4f4;
-            text-align: center;
-            margin-top: 50px;
+            font-family: var(--font);
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            color: var(--text-primary);
         }
-        .box {
-            background: white;
-            padding: 30px;
-            margin: auto;
-            width: 300px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+        /* Subtle radial ambient light */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 229, 160, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
         }
-        input, button {
-            margin: 10px;
-            padding: 10px;
-            width: 80%;
+
+        .card {
+            position: relative;
+            z-index: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 400px;
         }
+
+        /* Top badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-dim);
+            border: 1px solid rgba(0, 229, 160, 0.2);
+            border-radius: 100px;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 0.4rem;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin-bottom: 1.75rem;
+        }
+
+        /* Input fields */
+        .field {
+            margin-bottom: 1rem;
+        }
+
+        .field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px 12px 40px;
+            font-family: var(--font);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+        input[type="number"]::placeholder { color: var(--text-muted); }
+
+        input[type="number"]:hover {
+            border-color: var(--border-hover);
+            background: #22222c;
+        }
+
+        input[type="number"]:focus {
+            border-color: rgba(0, 229, 160, 0.4);
+            background: #22222c;
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        /* Button */
         button {
-            background: #28a745;
-            color: white;
+            width: 100%;
+            margin-top: 1.25rem;
+            padding: 14px;
+            background: var(--accent);
+            color: #0a1a14;
+            font-family: var(--font);
+            font-size: 0.95rem;
+            font-weight: 600;
             border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            letter-spacing: 0.01em;
+            transition: transform 0.15s, opacity 0.15s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
         }
+
+        button::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: white;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        button:hover { box-shadow: 0 4px 20px var(--accent-glow); }
+        button:active { transform: scale(0.98); }
+
+        button.loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Result panel */
         #result {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
+            margin-top: 1.5rem;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            display: none;
+        }
+
+        #result.visible { display: block; }
+
+        .result-inner {
+            background: var(--accent-dim);
+            border: 1px solid rgba(0, 229, 160, 0.2);
+            border-radius: var(--radius-sm);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .result-label {
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--accent);
+            opacity: 0.7;
+            margin-bottom: 4px;
+        }
+
+        .result-value {
+            font-family: var(--mono);
+            font-size: 2rem;
+            font-weight: 500;
+            color: var(--accent);
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .result-unit {
+            font-size: 0.875rem;
+            color: var(--accent);
+            opacity: 0.6;
+            margin-top: 4px;
+        }
+
+        .result-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 229, 160, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .result-icon svg {
+            width: 22px;
+            height: 22px;
+            color: var(--accent);
+        }
+
+        /* Error state */
+        .result-inner.error {
+            background: rgba(255, 92, 92, 0.08);
+            border-color: rgba(255, 92, 92, 0.2);
+        }
+
+        .result-inner.error .result-label,
+        .result-inner.error .result-value,
+        .result-inner.error .result-unit { color: var(--danger); }
+
+        .result-inner.error .result-icon { background: rgba(255, 92, 92, 0.12); }
+
+        /* Footer */
+        .footer {
+            margin-top: 1.5rem;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
         }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h2>Delivery Time Predictor</h2>
+<div class="card">
+    <div class="badge">
+        <span class="badge-dot"></span>
+        ML Model Active
+    </div>
 
-    <input type="number" id="age" placeholder="Delivery Person Age"><br>
-    <input type="number" step="0.1" id="rating" placeholder="Ratings"><br>
-    <input type="number" id="distance" placeholder="Distance (km)"><br>
+    <h1>Delivery Time<br>Predictor</h1>
+    <p class="subtitle">Enter delivery parameters to get an estimated arrival time powered by machine learning.</p>
 
-    <button onclick="predict()">Predict</button>
+    <div class="divider"></div>
+
+    <div class="field">
+        <label for="age">Delivery Person Age</label>
+        <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+            <input type="number" id="age" placeholder="e.g. 28">
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="rating">Delivery Person Rating</label>
+        <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <input type="number" step="0.1" id="rating" placeholder="e.g. 4.5" min="0" max="5">
+        </div>
+    </div>
+
+    <div class="field">
+        <label for="distance">Distance (km)</label>
+        <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z"/>
+            </svg>
+            <input type="number" step="0.1" id="distance" placeholder="e.g. 12.5">
+        </div>
+    </div>
+
+    <button onclick="predict()" id="predict-btn">
+        Predict Delivery Time
+    </button>
 
     <div id="result"></div>
+
+    <p class="footer">Predictions are estimates based on model training data</p>
 </div>
 
 <script>
@@ -56,22 +355,54 @@ function predict() {
         distance: parseFloat(document.getElementById("distance").value)
     };
 
-    fetch('http://127.0.0.1:5000/predict', {
+    const btn = document.getElementById("predict-btn");
+    const resultEl = document.getElementById("result");
+
+    btn.classList.add("loading");
+    btn.textContent = "Predicting…";
+
+    fetch('/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
     .then(res => res.json())
     .then(data => {
-        document.getElementById("result").innerText =
-            "Estimated Delivery Time: " + data.predicted_delivery_time.toFixed(2) + " mins";
+        const mins = data.predicted_delivery_time.toFixed(2);
+        resultEl.className = "visible";
+        resultEl.innerHTML = `
+            <div class="result-inner">
+                <div>
+                    <div class="result-label">Estimated Arrival</div>
+                    <div class="result-value">${mins}</div>
+                    <div class="result-unit">minutes</div>
+                </div>
+                <div class="result-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="3" width="15" height="13" rx="2"/>
+                        <path d="M16 8h4l3 5v3h-7V8z"/>
+                        <circle cx="5.5" cy="18.5" r="2.5"/>
+                        <circle cx="18.5" cy="18.5" r="2.5"/>
+                    </svg>
+                </div>
+            </div>`;
     })
-    .catch(err => console.error(err));
-
-   
+    .catch(err => {
+        console.error(err);
+        resultEl.className = "visible";
+        resultEl.innerHTML = `
+            <div class="result-inner error">
+                <div>
+                    <div class="result-label">Error</div>
+                    <div class="result-value" style="font-size:1rem; padding-top:4px;">Unable to fetch prediction</div>
+                </div>
+            </div>`;
+    })
+    .finally(() => {
+        btn.classList.remove("loading");
+        btn.textContent = "Predict Delivery Time";
+    });
 }
-
-
 </script>
 
 </body>
