@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delivery Time Predictor</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .box {
+            background: white;
+            padding: 30px;
+            margin: auto;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            width: 80%;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Delivery Time Predictor</h2>
+
+    <input type="number" id="age" placeholder="Delivery Person Age"><br>
+    <input type="number" step="0.1" id="rating" placeholder="Ratings"><br>
+    <input type="number" id="distance" placeholder="Distance (km)"><br>
+
+    <button onclick="predict()">Predict</button>
+
+    <div id="result"></div>
+</div>
+
+<script>
+function predict() {
+    const data = {
+        Delivery_person_Age: parseInt(document.getElementById("age").value),
+        Delivery_person_Ratings: parseFloat(document.getElementById("rating").value),
+        distance: parseFloat(document.getElementById("distance").value)
+    };
+
+    fetch('http://127.0.0.1:5000/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("result").innerText =
+            "Estimated Delivery Time: " + data.predicted_delivery_time.toFixed(2) + " mins";
+    })
+    .catch(err => console.error(err));
+
+   
+}
+
+
+</script>
+
+</body>
+</html>

@@ -1,38 +1,49 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import pickle
 import numpy as np
-
-app = Flask(__name__)
-
-# Load trained model
 import os
 
+app = Flask(__name__)
+CORS(app)  # Enable CORS
+
+# Load trained model
 model_path = os.path.join(os.path.dirname(__file__), '..', 'model.pkl')
 model = pickle.load(open(model_path, 'rb'))
 
+# Home route (UI)
 @app.route('/')
 def home():
-    return "Delivery Time Prediction API is running!"
+    return render_template('index.html')
 
+# Prediction API
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json
+    try:
+        data = request.json
 
-    # Extract inputs
-    features = [
-        data['Delivery_person_Age'],
-        data['Delivery_person_Ratings'],
-        data['distance']
-    ]
+        # Extract inputs
+        features = [
+            data['Delivery_person_Age'],
+            data['Delivery_person_Ratings'],
+            data['distance']
+        ]
 
-    # Convert to array
-    final_features = np.array([features])
+        # Convert to numpy array
+        final_features = np.array([features])
 
-    prediction = model.predict(final_features)
+        # Predict
+        prediction = model.predict(final_features)
 
-    return jsonify({
-        "predicted_delivery_time": float(prediction[0])
-    })
+        return jsonify({
+            "predicted_delivery_time": float(prediction[0])
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e)
+        }), 400
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
